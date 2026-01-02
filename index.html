@@ -1,0 +1,1895 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Электронный журнал</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="https://www.shutterstock.com/image-vector/vector-logo-school-600w-427910128.jpg">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .login-container, .main-container {
+            width: 100%;
+            max-width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            transition: opacity 0.5s ease;
+        }
+
+        .login-box {
+            background-color: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .login-box h2 {
+            margin-bottom: 25px;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+
+        .input-group input:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+
+        .login-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            width: 100%;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+
+        .login-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            margin-top: 15px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .main-container {
+            display: none;
+            flex-direction: column;
+        }
+
+        .header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logout-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .active-tab {
+            display: block;
+        }
+
+        /* Стили для навигации */
+        .navigation {
+            display: flex;
+            background-color: white;
+            border-top: 1px solid #ddd;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-btn {
+            flex: 1;
+            padding: 15px 10px;
+            background: none;
+            border: none;
+            font-size: 14px;
+            color: #7f8c8d;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s;
+        }
+
+        .nav-btn i {
+            font-size: 18px;
+        }
+
+        .nav-btn.active {
+            color: #3498db;
+            background-color: #f8f9fa;
+        }
+
+        .nav-btn:hover {
+            background-color: #f8f9fa;
+        }
+
+        /* Стили для дневника */
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .date-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .date-selector select {
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            background-color: white;
+        }
+
+        .schedule {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .lesson {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .lesson:last-child {
+            border-bottom: none;
+        }
+
+        .lesson-number {
+            font-weight: bold;
+            color: #3498db;
+            min-width: 30px;
+        }
+
+        .lesson-name {
+            flex: 1;
+            margin: 0 15px;
+        }
+
+        .lesson-grade {
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 5px;
+            background-color: #f1f8ff;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .lesson-time {
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+
+        .lesson-counter {
+            display: inline-block;
+            background-color: #e8f4fc;
+            color: #3498db;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+
+        /* Стили для профиля */
+        .profile-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .profile-photo {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 5px solid #3498db;
+            background-color: #f1f8ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 60px;
+            color: #3498db;
+        }
+
+        .profile-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-info {
+            background-color: white;
+            padding: 25px;
+            border-radius: 10px;
+            width: 100%;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .info-group {
+            margin-bottom: 20px;
+        }
+
+        .info-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .info-group input, .info-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .info-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .save-btn {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+
+        .save-btn:hover {
+            background-color: #27ae60;
+        }
+
+        /* Стили для статистики */
+        .quarter-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .quarter-btn {
+            padding: 10px 20px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .quarter-btn.active {
+            background-color: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+
+        .stats-table {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+        }
+
+        .stats-row {
+            display: flex;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .stats-row.header {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+
+        .subject-col {
+            flex: 2;
+            font-weight: 500;
+        }
+
+        .grades-col {
+            flex: 3;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .average-col {
+            flex: 1;
+            text-align: center;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .grade-bubble {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-size: 14px;
+            min-width: 25px;
+            text-align: center;
+            cursor: default;
+        }
+
+        .grade-5 { background-color: #d4edda; color: #155724; }
+        .grade-4 { background-color: #fff3cd; color: #856404; }
+        .grade-3 { background-color: #ffeaa7; color: #856404; }
+        .grade-2 { background-color: #f8d7da; color: #721c24; }
+
+        .overall-average {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            font-size: 1.2rem;
+        }
+
+        .overall-average span {
+            font-weight: bold;
+            color: #3498db;
+            font-size: 1.5rem;
+        }
+
+        /* Стили для общения */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 180px);
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            background-color: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            border-radius: 10px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+
+        .message.sent {
+            background-color: #dcf8c6;
+            margin-left: auto;
+        }
+
+        .message.received {
+            background-color: #f1f0f0;
+        }
+
+        .message-sender {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+
+        .chat-input {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .send-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .send-btn:hover {
+            background-color: #2980b9;
+        }
+
+        /* Стили для админ-панели */
+        .admin-nav {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .admin-nav-btn {
+            padding: 15px 20px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .admin-nav-btn.active {
+            background-color: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+
+        .admin-tab {
+            display: none;
+        }
+
+        .admin-tab.active-tab {
+            display: block;
+        }
+
+        .search-box {
+            margin-bottom: 20px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .students-list {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+
+        .student-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .student-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .student-item:last-child {
+            border-bottom: none;
+        }
+
+        .student-login {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .student-password {
+            color: #7f8c8d;
+            font-family: monospace;
+        }
+
+        .edit-btn {
+            background-color: #f39c12;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        /* Стили для вкладки "Оценки учеников" */
+        .grade-management-container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+
+        .grade-section {
+            margin-bottom: 30px;
+        }
+
+        .grade-section h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+        }
+
+        .subject-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .subject-card {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            border: 1px solid #e9ecef;
+            transition: all 0.3s;
+        }
+
+        .subject-card:hover {
+            border-color: #3498db;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .subject-card h4 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+            font-size: 1.1rem;
+        }
+
+        .grade-selector {
+            margin-top: 10px;
+        }
+
+        .grade-buttons {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .grade-btn {
+            flex: 1;
+            padding: 8px 5px;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .grade-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .grade-btn-5 {
+            background-color: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        .grade-btn-4 {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 2px solid #ffeaa7;
+        }
+
+        .grade-btn-3 {
+            background-color: #ffeaa7;
+            color: #856404;
+            border: 2px solid #f7dc6f;
+        }
+
+        .grade-btn-2 {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+
+        .grade-btn.selected {
+            border: 2px solid #2c3e50;
+            box-shadow: 0 0 0 2px rgba(44, 62, 80, 0.2);
+        }
+
+        .student-selector {
+            margin-top: 10px;
+        }
+
+        .student-selector select {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+
+        .add-grade-btn {
+            margin-top: 10px;
+            width: 100%;
+            padding: 8px 10px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .add-grade-btn:hover {
+            background-color: #27ae60;
+        }
+
+        .current-grade-info {
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            padding: 5px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .grades-history {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .grades-history h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .history-table th, .history-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .history-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .history-table tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .delete-grade-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .delete-grade-btn:hover {
+            background-color: #c0392b;
+        }
+
+        /* Счетчик предметов */
+        .subject-count {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-left: 10px;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .login-box {
+                padding: 30px 20px;
+                width: 95%;
+            }
+
+            .header h1 {
+                font-size: 1.2rem;
+            }
+
+            .nav-btn span {
+                font-size: 12px;
+            }
+
+            .lesson {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .lesson-name {
+                margin: 0;
+            }
+
+            .stats-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .grades-col {
+                justify-content: flex-start;
+            }
+
+            .admin-nav-btn {
+                min-width: 120px;
+                padding: 12px 15px;
+                font-size: 14px;
+            }
+
+            .subject-list {
+                grid-template-columns: 1fr;
+            }
+
+            .grade-buttons {
+                flex-wrap: wrap;
+            }
+
+            .grade-btn {
+                min-width: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Экран входа -->
+    <div class="login-container" id="loginContainer">
+        <div class="login-box">
+            <h2>Вход в электронный журнал</h2>
+            <div class="input-group">
+                <label for="login">Логин</label>
+                <input type="text" id="login" placeholder="Введите логин">
+            </div>
+            <div class="input-group">
+                <label for="password">Пароль</label>
+                <input type="password" id="password" placeholder="Введите пароль">
+            </div>
+            <button class="login-btn" id="loginBtn">Войти</button>
+            <div class="error-message" id="errorMessage">Неверный логин или пароль</div>
+        </div>
+    </div>
+
+    <!-- Основной интерфейс (для обычных пользователей) -->
+    <div class="main-container" id="mainContainer">
+        <div class="header">
+            <h1 id="pageTitle">Дневник</h1>
+            <div class="user-info">
+                <span id="currentUser">Пользователь</span>
+                <button class="logout-btn" id="logoutBtn">Выйти</button>
+            </div>
+        </div>
+
+        <div class="content" id="content">
+            <!-- Дневник -->
+            <div class="tab-content active-tab" id="diaryTab">
+                <div class="date-selector">
+                    <div>
+                        <label for="diaryDate">Дата:</label>
+                        <select id="diaryDate">
+                            <!-- Даты будут заполнены через JavaScript -->
+                        </select>
+                    </div>
+                    <div>
+                        <label for="diaryDay">День недели:</label>
+                        <select id="diaryDay">
+                            <option value="Понедельник">Понедельник</option>
+                            <option value="Вторник">Вторник</option>
+                            <option value="Среда">Среда</option>
+                            <option value="Четверг">Четверг</option>
+                            <option value="Пятница">Пятница</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="day-header">
+                    <h2 id="currentDay">Понедельник</h2>
+                    <div class="lesson-counter">Уроков сегодня: <span id="lessonCount">8</span></div>
+                </div>
+                <div class="schedule" id="schedule">
+                    <!-- Расписание будет заполнено через JavaScript -->
+                </div>
+            </div>
+
+            <!-- Статистика -->
+            <div class="tab-content" id="statsTab">
+                <div class="quarter-selector">
+                    <button class="quarter-btn active" data-quarter="1">1-четверть</button>
+                    <button class="quarter-btn" data-quarter="2">2-четверть</button>
+                    <button class="quarter-btn" data-quarter="3">3-четверть</button>
+                    <button class="quarter-btn" data-quarter="4">4-четверть</button>
+                </div>
+
+                <div class="stats-table">
+                    <div class="stats-row header">
+                        <div class="subject-col">Предмет</div>
+                        <div class="grades-col">Оценки</div>
+                        <div class="average-col">Средний балл</div>
+                    </div>
+                    <div id="gradesList">
+                        <!-- Оценки будут заполнены через JavaScript -->
+                    </div>
+                </div>
+
+                <div class="overall-average">
+                    Средний балл за четверть: <span id="quarterAverage">0.0</span>
+                </div>
+            </div>
+
+            <!-- Профиль -->
+            <div class="tab-content" id="profileTab">
+                <div class="profile-container">
+                    <div class="profile-photo" id="profilePhoto">
+                        <i class="fas fa-user"></i>
+                    </div>
+
+                    <div class="profile-info">
+                        <div class="info-group">
+                            <label>Логин</label>
+                            <input type="text" id="profileLogin" readonly>
+                        </div>
+
+                        <div class="info-group">
+                            <label>Новый пароль</label>
+                            <input type="password" id="newPassword" placeholder="Введите новый пароль">
+                        </div>
+
+                        <div class="info-group">
+                            <label>Подтверждение пароля</label>
+                            <input type="password" id="confirmPassword" placeholder="Подтвердите новый пароль">
+                        </div>
+
+                        <div class="info-group">
+                            <label>Хобби и интересы</label>
+                            <textarea id="hobbies" placeholder="Расскажите о своих увлечениях"></textarea>
+                        </div>
+
+                        <button class="save-btn" id="saveProfileBtn">Сохранить изменения</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Общение -->
+            <div class="tab-content" id="chatTab">
+                <div class="chat-container">
+                    <div class="chat-messages" id="chatMessages">
+                        <!-- Сообщения будут заполнены через JavaScript -->
+                    </div>
+
+                    <div class="chat-input">
+                        <input type="text" id="messageInput" placeholder="Введите сообщение...">
+                        <button class="send-btn" id="sendMessageBtn">Отправить</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Навигация для обычных пользователей -->
+        <div class="navigation" id="userNavigation">
+            <button class="nav-btn active" data-tab="diaryTab">
+                <i class="fas fa-book"></i>
+                <span>Дневник</span>
+            </button>
+            <button class="nav-btn" data-tab="statsTab">
+                <i class="fas fa-chart-line"></i>
+                <span>Статистика</span>
+            </button>
+            <button class="nav-btn" data-tab="profileTab">
+                <i class="fas fa-user"></i>
+                <span>Профиль</span>
+            </button>
+            <button class="nav-btn" data-tab="chatTab">
+                <i class="fas fa-comments"></i>
+                <span>Общение</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Интерфейс администратора -->
+    <div class="main-container" id="adminContainer">
+        <div class="header">
+            <h1>Панель администратора</h1>
+            <div class="user-info">
+                <span>Администратор</span>
+                <button class="logout-btn" id="adminLogoutBtn">Выйти</button>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="admin-nav">
+                <button class="admin-nav-btn active" id="adminStudentsBtn">Данные учеников</button>
+                <button class="admin-nav-btn" id="adminGradesBtn">Оценки учеников</button>
+                <button class="admin-nav-btn" id="adminChatBtn">Общение</button>
+            </div>
+
+            <!-- Данные учеников -->
+            <div class="admin-tab active-tab" id="adminStudentsTab">
+                <div class="search-box">
+                    <input type="text" id="studentSearch" placeholder="Поиск по логину...">
+                </div>
+
+                <div class="students-list" id="studentsList">
+                    <!-- Список учеников будет заполнен через JavaScript -->
+                </div>
+            </div>
+
+            <!-- Оценки учеников -->
+            <div class="admin-tab" id="adminGradesTab">
+                <div class="grade-management-container">
+                    <div class="grade-section">
+                        <h3>Выставление оценок (дата: сегодня)</h3>
+                        <div class="subject-list" id="subjectList">
+                            <!-- Список предметов с кнопками оценок будет заполнен через JavaScript -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grades-history">
+                    <h3>История оценок</h3>
+                    <div id="gradesHistoryTable">
+                        <table class="history-table">
+                            <thead>
+                                <tr>
+                                    <th>Ученик</th>
+                                    <th>Предмет</th>
+                                    <th>Оценка</th>
+                                    <th>Дата</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody id="gradesHistoryBody">
+                                <!-- Строки будут добавлены через JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Общение (админская версия) -->
+            <div class="admin-tab" id="adminChatTab">
+                <div class="chat-container">
+                    <div class="chat-messages" id="adminChatMessages">
+                        <!-- Сообщения будут заполнены через JavaScript -->
+                    </div>
+
+                    <div class="chat-input">
+                        <input type="text" id="adminMessageInput" placeholder="Введите сообщение...">
+                        <button class="send-btn" id="adminSendMessageBtn">Отправить</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Данные пользователей
+        const users = {
+            "admin": {password: "kdjsghfiudsgfisudgfsd234", role: "admin"},
+            "Saidamin": {password: "Pupsik", role: "user", hobbies: "Футбол, программирование", grades: {}},
+            "Shahobiddin": {password: "Pupsik007", role: "user", hobbies: "Баскетбол, чтение", grades: {}},
+            "Iskandar": {password: "superpupsik007", role: "user", hobbies: "Шахматы, музыка", grades: {}}
+        };
+
+        // Расписание на неделю
+        const schedule = {
+            "Понедельник": ["Математика", "Завтрак", "Английский", "Английский", "Физра", "Биология", "Обед", "Химия", "Русс.яз", "Технология"],
+            "Вторник": ["Английский", "Завтрак", "Арабский", "Арабский", "Информатика", "Математика", "Обед", "Математика", "Изо"],
+            "Среда": ["Арабский", "Завтрак", "Математика", "Воспитание", "Английский", "Английский", "Обед", "История", "География", "Футбол"],
+            "Четверг": ["Английский", "Завтрак", "Английский", "Физика", "Узбекский", "История", "Обед", "История Узбекситана", "Химия", "Русский язык"],
+            "Пятница": ["Узбекский", "Завтрак", "История", "Литература", "Арабский", "Математика", "Обед", "Биология", "Математика", "География"]
+        };
+
+        // Все предметы
+        const allSubjects = [
+            "Математика", "Английский", "Арабский", "Биология", "Химия",
+            "История", "География", "Физра", "Русс.яз", "Информатика",
+            "Изо", "Воспитание", "Футбол", "Физика", "Узбекский",
+            "История Узбекситана", "Литература", "Технология"
+        ];
+
+        // Сообщения в чате
+        let chatMessages = [
+            {sender: "Saidamin", text: "Привет всем! Кто сделал домашку по математике?", time: "10:30"},
+            {sender: "Iskandar", text: "Я сделал, но не уверен в правильности", time: "10:35"},
+            {sender: "Shahobiddin", text: "Можем проверить вместе на перемене", time: "10:40"},
+            {sender: "admin", text: "Напоминаю, завтра контрольная по истории", time: "11:15"}
+        ];
+
+        // Оценки учеников
+        let allStudentGrades = [];
+
+        // Получить текущую дату в формате YYYY-MM-DD
+        function getCurrentDate() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        // Получить случайные предметы (без использования eval)
+        function getRandomSubjects(count) {
+            // Создаем копию массива и перемешиваем
+            const subjectsCopy = [...allSubjects];
+            for (let i = subjectsCopy.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [subjectsCopy[i], subjectsCopy[j]] = [subjectsCopy[j], subjectsCopy[i]];
+            }
+            return subjectsCopy.slice(0, count);
+        }
+
+        // Получить случайную оценку
+        function getRandomGrade() {
+            const grades = ["2", "3", "4", "5"];
+            return grades[Math.floor(Math.random() * grades.length)];
+        }
+
+        // Добавить демонстрационные оценки
+        function initializeDemoGrades() {
+            allStudentGrades = [];
+            const demoStudents = ["Saidamin", "Shahobiddin", "Iskandar"];
+            const currentDate = getCurrentDate();
+
+            demoStudents.forEach(student => {
+                const subjects = getRandomSubjects(3);
+                subjects.forEach(subject => {
+                    const grade = getRandomGrade();
+                    allStudentGrades.push({
+                        id: Date.now() + Math.random(),
+                        student: student,
+                        subject: subject,
+                        grade: grade,
+                        date: currentDate,
+                        quarter: "1"
+                    });
+                });
+            });
+
+            saveToLocalStorage();
+        }
+
+        // Получить оценки ученика за определенную дату
+        function getGradesForDate(student, date) {
+            return allStudentGrades.filter(grade =>
+                grade.student === student && grade.date === date
+            );
+        }
+
+        // Получить оценку по предмету и дате
+        function getGradeForSubjectAndDate(student, subject, date) {
+            return allStudentGrades.find(grade =>
+                grade.student === student &&
+                grade.subject === subject &&
+                grade.date === date
+            );
+        }
+
+        // Получить все оценки ученика
+        function getAllGradesForStudent(student) {
+            return allStudentGrades.filter(grade => grade.student === student);
+        }
+
+        // Получить оценки по предметам для статистики
+        function getGradesBySubject(student, quarter) {
+            const gradesBySubject = {};
+
+            allStudentGrades.forEach(grade => {
+                if (grade.student === student && grade.quarter === quarter) {
+                    if (!gradesBySubject[grade.subject]) {
+                        gradesBySubject[grade.subject] = [];
+                    }
+                    gradesBySubject[grade.subject].push(parseInt(grade.grade));
+                }
+            });
+
+            return gradesBySubject;
+        }
+
+        // Форматирование даты
+        function formatDate(dateString) {
+            if (!dateString) return "—";
+            const date = new Date(dateString);
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}.${month}.${year}`;
+        }
+
+        // Определение четверти по дате
+        function getQuarterByDate(dateString) {
+            const date = new Date(dateString);
+            const month = date.getMonth() + 1;
+
+            if (month >= 9 || month <= 1) return "1";
+            if (month >= 2 && month <= 4) return "2";
+            if (month >= 5 && month <= 7) return "3";
+            return "4";
+        }
+
+        // Текущий пользователь и состояние
+        let currentUser = null;
+        let currentDay = "Понедельник";
+        let currentQuarter = "1";
+        let currentDate = getCurrentDate();
+
+        // DOM элементы
+        const loginContainer = document.getElementById('loginContainer');
+        const mainContainer = document.getElementById('mainContainer');
+        const adminContainer = document.getElementById('adminContainer');
+        const loginBtn = document.getElementById('loginBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const adminLogoutBtn = document.getElementById('adminLogoutBtn');
+        const errorMessage = document.getElementById('errorMessage');
+        const pageTitle = document.getElementById('pageTitle');
+        const currentUserSpan = document.getElementById('currentUser');
+        const currentDayElement = document.getElementById('currentDay');
+        const scheduleElement = document.getElementById('schedule');
+        const lessonCountElement = document.getElementById('lessonCount');
+        const gradesListElement = document.getElementById('gradesList');
+        const quarterAverageElement = document.getElementById('quarterAverage');
+        const profileLoginInput = document.getElementById('profileLogin');
+        const newPasswordInput = document.getElementById('newPassword');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        const hobbiesInput = document.getElementById('hobbies');
+        const saveProfileBtn = document.getElementById('saveProfileBtn');
+        const chatMessagesElement = document.getElementById('chatMessages');
+        const messageInput = document.getElementById('messageInput');
+        const sendMessageBtn = document.getElementById('sendMessageBtn');
+        const adminChatMessagesElement = document.getElementById('adminChatMessages');
+        const adminMessageInput = document.getElementById('adminMessageInput');
+        const adminSendMessageBtn = document.getElementById('adminSendMessageBtn');
+        const studentSearchInput = document.getElementById('studentSearch');
+        const studentsListElement = document.getElementById('studentsList');
+        const adminStudentsBtn = document.getElementById('adminStudentsBtn');
+        const adminGradesBtn = document.getElementById('adminGradesBtn');
+        const adminChatBtn = document.getElementById('adminChatBtn');
+        const adminStudentsTab = document.getElementById('adminStudentsTab');
+        const adminGradesTab = document.getElementById('adminGradesTab');
+        const adminChatTab = document.getElementById('adminChatTab');
+        const subjectListElement = document.getElementById('subjectList');
+        const gradesHistoryBody = document.getElementById('gradesHistoryBody');
+        const diaryDateSelect = document.getElementById('diaryDate');
+        const diaryDaySelect = document.getElementById('diaryDay');
+
+        // Дни недели
+        const daysOfWeek = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница"];
+
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            // Определяем текущий день недели
+            const today = new Date();
+            const dayIndex = today.getDay();
+            currentDay = dayIndex === 0 || dayIndex === 6 ? "Понедельник" : daysOfWeek[dayIndex - 1];
+
+            // Устанавливаем обработчики событий
+            setupEventListeners();
+
+            // Загружаем данные из localStorage
+            loadFromLocalStorage();
+
+            // Если оценок нет, инициализируем демо-оценки
+            if (allStudentGrades.length === 0) {
+                initializeDemoGrades();
+            }
+
+            // Показываем экран входа
+            showLoginScreen();
+        });
+
+        // Настройка обработчиков событий
+        function setupEventListeners() {
+            // Кнопка входа
+            loginBtn.addEventListener('click', handleLogin);
+            document.getElementById('password').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') handleLogin();
+            });
+
+            // Кнопки выхода
+            logoutBtn.addEventListener('click', showLoginScreen);
+            adminLogoutBtn.addEventListener('click', showLoginScreen);
+
+            // Навигация для обычных пользователей
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    switchTab(tabId);
+                    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    const tabTitles = {
+                        'diaryTab': 'Дневник',
+                        'statsTab': 'Статистика',
+                        'profileTab': 'Профиль',
+                        'chatTab': 'Общение'
+                    };
+                    pageTitle.textContent = tabTitles[tabId];
+                });
+            });
+
+            // Кнопки выбора четверти
+            document.querySelectorAll('.quarter-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    currentQuarter = this.getAttribute('data-quarter');
+                    document.querySelectorAll('.quarter-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    updateGrades();
+                });
+            });
+
+            // Кнопка сохранения профиля
+            saveProfileBtn.addEventListener('click', saveProfile);
+
+            // Отправка сообщения
+            sendMessageBtn.addEventListener('click', sendMessage);
+            messageInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') sendMessage();
+            });
+            adminSendMessageBtn.addEventListener('click', sendAdminMessage);
+            adminMessageInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') sendAdminMessage();
+            });
+
+            // Навигация администратора
+            adminStudentsBtn.addEventListener('click', function() {
+                switchAdminTab('adminStudentsTab');
+                updateAdminNavButtons(this);
+            });
+            adminGradesBtn.addEventListener('click', function() {
+                switchAdminTab('adminGradesTab');
+                updateAdminNavButtons(this);
+                updateSubjectsForGrades();
+                updateGradesHistory();
+            });
+            adminChatBtn.addEventListener('click', function() {
+                switchAdminTab('adminChatTab');
+                updateAdminNavButtons(this);
+                updateChatMessages(adminChatMessagesElement);
+            });
+
+            // Поиск учеников
+            studentSearchInput.addEventListener('input', filterStudents);
+        }
+
+        // Обновление активной кнопки навигации админа
+        function updateAdminNavButtons(activeButton) {
+            document.querySelectorAll('.admin-nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            activeButton.classList.add('active');
+        }
+
+        // Обработка входа
+        function handleLogin() {
+            const login = document.getElementById('login').value.trim();
+            const password = document.getElementById('password').value;
+
+            if (users[login] && users[login].password === password) {
+                currentUser = login;
+                document.getElementById('login').value = '';
+                document.getElementById('password').value = '';
+                errorMessage.style.display = 'none';
+
+                if (users[login].role === 'admin') {
+                    showAdminInterface();
+                } else {
+                    showUserInterface();
+                }
+
+                saveToLocalStorage();
+            } else {
+                errorMessage.style.display = 'block';
+            }
+        }
+
+        // Показать экран входа
+        function showLoginScreen() {
+            loginContainer.style.display = 'flex';
+            mainContainer.style.display = 'none';
+            adminContainer.style.display = 'none';
+            currentUser = null;
+        }
+
+        // Показать интерфейс пользователя
+        function showUserInterface() {
+            loginContainer.style.display = 'none';
+            mainContainer.style.display = 'flex';
+            adminContainer.style.display = 'none';
+            currentUserSpan.textContent = currentUser;
+            updateDiary();
+            updateProfile();
+            updateGrades();
+            updateChatMessages(chatMessagesElement);
+            switchTab('diaryTab');
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector('.nav-btn[data-tab="diaryTab"]').classList.add('active');
+            pageTitle.textContent = 'Дневник';
+        }
+
+        // Показать интерфейс администратора
+        function showAdminInterface() {
+            loginContainer.style.display = 'none';
+            mainContainer.style.display = 'none';
+            adminContainer.style.display = 'flex';
+            updateStudentsList();
+            updateSubjectsForGrades();
+            updateGradesHistory();
+            updateChatMessages(adminChatMessagesElement);
+            switchAdminTab('adminStudentsTab');
+            adminStudentsBtn.classList.add('active');
+            adminGradesBtn.classList.remove('active');
+            adminChatBtn.classList.remove('active');
+        }
+
+        // Обновление списка предметов для выставления оценок
+        function updateSubjectsForGrades() {
+            subjectListElement.innerHTML = '';
+            const studentList = Object.keys(users).filter(username => users[username].role === 'user');
+            const currentDate = getCurrentDate();
+
+            allSubjects.forEach(subject => {
+                const subjectCard = document.createElement('div');
+                subjectCard.className = 'subject-card';
+                subjectCard.dataset.subject = subject;
+
+                subjectCard.innerHTML = `
+                    <h4>${subject}</h4>
+                    <div class="grade-selector">
+                        <div class="grade-buttons">
+                            <button class="grade-btn grade-btn-5" data-grade="5">5</button>
+                            <button class="grade-btn grade-btn-4" data-grade="4">4</button>
+                            <button class="grade-btn grade-btn-3" data-grade="3">3</button>
+                            <button class="grade-btn grade-btn-2" data-grade="2">2</button>
+                        </div>
+                        <div class="student-selector">
+                            <select class="student-select" data-subject="${subject}">
+                                <option value="">-- Выберите ученика --</option>
+                                ${studentList.map(student => `<option value="${student}">${student}</option>`).join('')}
+                            </select>
+                        </div>
+                        <button class="add-grade-btn" data-subject="${subject}">Поставить оценку</button>
+                        <div class="current-grade-info" id="grade-info-${subject.replace(/\s+/g, '-')}">
+                            Дата: ${formatDate(currentDate)}
+                        </div>
+                    </div>
+                `;
+
+                subjectListElement.appendChild(subjectCard);
+
+                const gradeButtons = subjectCard.querySelectorAll('.grade-btn');
+                gradeButtons.forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        gradeButtons.forEach(b => b.classList.remove('selected'));
+                        this.classList.add('selected');
+                    });
+                });
+
+                const studentSelect = subjectCard.querySelector('.student-select');
+                studentSelect.addEventListener('change', function() {
+                    const student = this.value;
+                    const subject = this.dataset.subject;
+                    updateCurrentGradeInfo(student, subject);
+                });
+
+                const addGradeBtn = subjectCard.querySelector('.add-grade-btn');
+                addGradeBtn.addEventListener('click', function() {
+                    const subject = this.dataset.subject;
+                    const studentSelect = subjectCard.querySelector('.student-select');
+                    const student = studentSelect.value;
+                    const selectedGradeBtn = subjectCard.querySelector('.grade-btn.selected');
+
+                    if (!student) {
+                        alert('Выберите ученика!');
+                        return;
+                    }
+
+                    if (!selectedGradeBtn) {
+                        alert('Выберите оценку!');
+                        return;
+                    }
+
+                    const grade = selectedGradeBtn.dataset.grade;
+                    addGradeDirectly(student, subject, grade);
+
+                    gradeButtons.forEach(b => b.classList.remove('selected'));
+                    studentSelect.value = '';
+                    updateCurrentGradeInfo(student, subject);
+                });
+            });
+
+            updateAllCurrentGradeInfo();
+        }
+
+        // Обновление информации о текущей оценке
+        function updateCurrentGradeInfo(student, subject) {
+            if (!student || !subject) return;
+
+            const currentDate = getCurrentDate();
+            const existingGrade = getGradeForSubjectAndDate(student, subject, currentDate);
+            const gradeInfoElement = document.getElementById(`grade-info-${subject.replace(/\s+/g, '-')}`);
+
+            if (existingGrade) {
+                gradeInfoElement.innerHTML = `Ученик ${student} уже имеет оценку <span class="grade-bubble grade-${existingGrade.grade}">${existingGrade.grade}</span><br>Дата: ${formatDate(currentDate)}`;
+            } else {
+                gradeInfoElement.innerHTML = `Ученик ${student} - нет оценки<br>Дата: ${formatDate(currentDate)}`;
+            }
+        }
+
+        // Обновление информации о текущих оценках для всех предметов
+        function updateAllCurrentGradeInfo() {
+            const studentSelects = document.querySelectorAll('.student-select');
+            studentSelects.forEach(select => {
+                if (select.value) {
+                    updateCurrentGradeInfo(select.value, select.dataset.subject);
+                }
+            });
+        }
+
+        // Добавление оценки (использует текущую дату)
+        function addGradeDirectly(student, subject, grade) {
+            const currentDate = getCurrentDate();
+
+            if (!student || !subject || !grade) {
+                alert('Заполните все поля!');
+                return;
+            }
+
+            const gradeNum = parseInt(grade);
+            if (gradeNum < 2 || gradeNum > 5) {
+                alert('Оценка должна быть от 2 до 5!');
+                return;
+            }
+
+            // Удаляем старую оценку за этот предмет и дату
+            allStudentGrades = allStudentGrades.filter(g =>
+                !(g.student === student && g.subject === subject && g.date === currentDate)
+            );
+
+            // Добавляем новую оценку
+            allStudentGrades.push({
+                id: Date.now() + Math.random(),
+                student: student,
+                subject: subject,
+                grade: grade,
+                date: currentDate,
+                quarter: getQuarterByDate(currentDate)
+            });
+
+            updateGradesHistory();
+            saveToLocalStorage();
+            alert(`Оценка ${grade} по предмету "${subject}" добавлена ученику ${student}`);
+        }
+
+        // Переключение вкладок
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active-tab');
+            });
+            document.getElementById(tabId).classList.add('active-tab');
+        }
+
+        function switchAdminTab(tabId) {
+            document.querySelectorAll('.admin-tab').forEach(tab => {
+                tab.classList.remove('active-tab');
+            });
+            document.getElementById(tabId).classList.add('active-tab');
+        }
+
+        // Обновление дневника
+        function updateDiary() {
+            currentDayElement.textContent = currentDay;
+            const todaySchedule = schedule[currentDay] || [];
+            const lessonsCount = todaySchedule.filter(lesson =>
+                !['Завтрак', 'Обед', 'Ужин'].includes(lesson)
+            ).length;
+            lessonCountElement.textContent = lessonsCount;
+            scheduleElement.innerHTML = '';
+
+            todaySchedule.forEach((lesson, index) => {
+                const lessonElement = document.createElement('div');
+                lessonElement.className = 'lesson';
+                const isMeal = ['Завтрак', 'Обед', 'Ужин'].includes(lesson);
+
+                lessonElement.innerHTML = `
+                    <div class="lesson-number">${index + 1}</div>
+                    <div class="lesson-name">
+                        ${lesson}
+                        ${isMeal ? '<span class="lesson-counter">Прием пищи</span>' : ''}
+                    </div>
+                    <div class="lesson-time">${getLessonTime(index)}</div>
+                `;
+
+                scheduleElement.appendChild(lessonElement);
+            });
+        }
+
+        // Получить время урока
+        function getLessonTime(lessonIndex) {
+            const startTimes = ["8:00", "8:50", "9:45", "10:40", "11:35", "12:30", "13:25", "14:20", "15:15", "16:10"];
+            return startTimes[lessonIndex] || "---";
+        }
+
+        // Обновление оценок в статистике
+        function updateGrades() {
+            gradesListElement.innerHTML = '';
+            const gradesBySubject = getGradesBySubject(currentUser, currentQuarter);
+            let totalSum = 0;
+            let totalCount = 0;
+
+            allSubjects.forEach(subject => {
+                const grades = gradesBySubject[subject] || [];
+                let average = "—";
+                if (grades.length > 0) {
+                    const sum = grades.reduce((a, b) => a + b, 0);
+                    average = (sum / grades.length).toFixed(2);
+                    totalSum += sum;
+                    totalCount += grades.length;
+                }
+
+                const gradeRow = document.createElement('div');
+                gradeRow.className = 'stats-row';
+                const gradesHTML = grades.map(grade =>
+                    `<div class="grade-bubble grade-${grade}">${grade}</div>`
+                ).join('');
+                const gradesCount = grades.length > 0 ? `<span class="subject-count">(${grades.length} оценок)</span>` : '';
+
+                gradeRow.innerHTML = `
+                    <div class="subject-col">${subject} ${gradesCount}</div>
+                    <div class="grades-col">${gradesHTML || "Нет оценок"}</div>
+                    <div class="average-col">${average}</div>
+                `;
+
+                gradesListElement.appendChild(gradeRow);
+            });
+
+            const overallAverage = totalCount > 0 ? (totalSum / totalCount).toFixed(2) : "0.00";
+            quarterAverageElement.textContent = overallAverage;
+        }
+
+        // Обновление профиля
+        function updateProfile() {
+            profileLoginInput.value = currentUser;
+            if (users[currentUser]) {
+                hobbiesInput.value = users[currentUser].hobbies || '';
+            }
+        }
+
+        // Сохранение профиля
+        function saveProfile() {
+            const newPassword = newPasswordInput.value.trim();
+            const confirmPassword = confirmPasswordInput.value.trim();
+            const hobbies = hobbiesInput.value.trim();
+
+            if (newPassword && newPassword !== confirmPassword) {
+                alert('Пароли не совпадают!');
+                return;
+            }
+
+            if (newPassword) {
+                users[currentUser].password = newPassword;
+                alert('Пароль успешно изменен!');
+                newPasswordInput.value = '';
+                confirmPasswordInput.value = '';
+            }
+
+            users[currentUser].hobbies = hobbies;
+            saveToLocalStorage();
+            alert('Изменения сохранены!');
+        }
+
+        // Обновление сообщений в чате
+        function updateChatMessages(chatElement) {
+            chatElement.innerHTML = '';
+
+            chatMessages.forEach(msg => {
+                const messageElement = document.createElement('div');
+                const isCurrentUser = msg.sender === currentUser ||
+                    (currentUser === 'admin' && msg.sender === 'admin');
+
+                messageElement.className = `message ${isCurrentUser ? 'sent' : 'received'}`;
+                messageElement.innerHTML = `
+                    <div class="message-sender">${msg.sender}</div>
+                    <div class="message-text">${msg.text}</div>
+                    <div class="message-time" style="font-size: 12px; color: #999; text-align: right; margin-top: 5px;">${msg.time}</div>
+                `;
+
+                chatElement.appendChild(messageElement);
+            });
+
+            chatElement.scrollTop = chatElement.scrollHeight;
+        }
+
+        // Отправка сообщения
+        function sendMessage() {
+            const text = messageInput.value.trim();
+            if (!text) return;
+
+            const now = new Date();
+            const time = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+            chatMessages.push({
+                sender: currentUser,
+                text: text,
+                time: time
+            });
+
+            messageInput.value = '';
+            updateChatMessages(chatMessagesElement);
+            saveToLocalStorage();
+        }
+
+        function sendAdminMessage() {
+            const text = adminMessageInput.value.trim();
+            if (!text) return;
+
+            const now = new Date();
+            const time = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+            chatMessages.push({
+                sender: 'admin',
+                text: text,
+                time: time
+            });
+
+            adminMessageInput.value = '';
+            updateChatMessages(adminChatMessagesElement);
+            saveToLocalStorage();
+        }
+
+        // Обновление списка учеников
+        function updateStudentsList() {
+            studentsListElement.innerHTML = '';
+
+            for (const username in users) {
+                if (users[username].role === 'user') {
+                    const user = users[username];
+                    const studentItem = document.createElement('div');
+                    studentItem.className = 'student-item';
+                    studentItem.setAttribute('data-login', username);
+
+                    studentItem.innerHTML = `
+                        <div>
+                            <div class="student-login">${username}</div>
+                            <div class="student-password">Пароль: ${user.password}</div>
+                        </div>
+                        <button class="edit-btn" onclick="editStudent('${username}')">Изменить</button>
+                    `;
+
+                    studentItem.addEventListener('click', function(e) {
+                        if (!e.target.classList.contains('edit-btn')) {
+                            loginAsStudent(username);
+                        }
+                    });
+
+                    studentsListElement.appendChild(studentItem);
+                }
+            }
+        }
+
+        // Фильтрация учеников
+        function filterStudents() {
+            const searchText = studentSearchInput.value.toLowerCase();
+            const studentItems = studentsListElement.querySelectorAll('.student-item');
+
+            studentItems.forEach(item => {
+                const login = item.getAttribute('data-login').toLowerCase();
+                if (login.includes(searchText)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        // Редактирование ученика
+        window.editStudent = function(username) {
+            const newPassword = prompt(`Введите новый пароль для ${username}:`, users[username].password);
+
+            if (newPassword !== null) {
+                users[username].password = newPassword;
+                updateStudentsList();
+                saveToLocalStorage();
+                alert('Пароль изменен!');
+            }
+        };
+
+        // Вход в аккаунт ученика
+        function loginAsStudent(username) {
+            if (confirm(`Вы хотите войти в аккаунт ученика ${username}?`)) {
+                currentUser = username;
+                showUserInterface();
+            }
+        }
+
+        // Обновление истории оценок
+        function updateGradesHistory() {
+            gradesHistoryBody.innerHTML = '';
+
+            if (allStudentGrades.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td colspan="5" style="text-align: center; padding: 20px;">Нет оценок</td>`;
+                gradesHistoryBody.appendChild(row);
+                return;
+            }
+
+            allStudentGrades.forEach(grade => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${grade.student}</td>
+                    <td>${grade.subject}</td>
+                    <td><div class="grade-bubble grade-${grade.grade}">${grade.grade}</div></td>
+                    <td>${formatDate(grade.date)}</td>
+                    <td><button class="delete-grade-btn" onclick="deleteGrade(${grade.id})">Удалить</button></td>
+                `;
+                gradesHistoryBody.appendChild(row);
+            });
+        }
+
+        // Удаление оценки
+        window.deleteGrade = function(id) {
+            if (confirm('Вы уверены, что хотите удалить эту оценку?')) {
+                allStudentGrades = allStudentGrades.filter(grade => grade.id !== id);
+                updateGradesHistory();
+                saveToLocalStorage();
+                updateSubjectsForGrades();
+            }
+        };
+
+        // Сохранение данных
+        function saveToLocalStorage() {
+            const data = {
+                users: users,
+                chatMessages: chatMessages,
+                allStudentGrades: allStudentGrades
+            };
+            localStorage.setItem('eJournalData', JSON.stringify(data));
+        }
+
+        // Загрузка данных
+        function loadFromLocalStorage() {
+            const savedData = localStorage.getItem('eJournalData');
+
+            if (savedData) {
+                try {
+                    const data = JSON.parse(savedData);
+
+                    if (data.users) {
+                        for (const username in data.users) {
+                            if (users[username]) {
+                                users[username] = {...users[username], ...data.users[username]};
+                            }
+                        }
+                    }
+
+                    if (data.chatMessages && data.chatMessages.length > 0) {
+                        chatMessages = data.chatMessages;
+                    }
+
+                    if (data.allStudentGrades && data.allStudentGrades.length > 0) {
+                        allStudentGrades = data.allStudentGrades;
+                    }
+                } catch (e) {
+                    console.error('Ошибка при загрузке данных:', e);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
